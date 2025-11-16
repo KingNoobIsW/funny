@@ -22,6 +22,8 @@
             color: white;
             font-size: 22px;
             font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            padding: 10px;
             transition: background 0.15s;
         }
     </style>
@@ -41,7 +43,82 @@ let y = 50;
 let dx = 3;
 let dy = 3;
 
-// Bounce + flash + sound
+// Shared communication channel for all popups
+const channel = new BroadcastChannel("popupTalk");
+
+// Annoying messages for talking
+const annoyingLines = [
+    "ez gg no re",
+    "STOP TRYING TO CLOSE ME!",
+    "your balls lwk",
+    "YOU CAN’T GET RID OF ME!",
+    "i verified cols",
+    "I",
+    "CLICK THE X",
+    "WHY",
+    "taking your data trust",
+    "hello im unc",
+    "dih",
+    "ez ez ez ez ez ez ez ez",
+    "hi",
+    ":D",
+];
+
+// Replies to another popup's message
+const replyLines = [
+    "but why",
+    "hello im unc",
+    "ez",
+    "ragebait",
+    "your so niche boiii",
+    "ez",
+    "dih",
+    "tuff boiiiiiiiii mango mango labubu lets steal a 67",
+];
+
+// Speak out loud
+function speak(text) {
+    try {
+        let utter = new SpeechSynthesisUtterance(text);
+        utter.pitch = 1.2;
+        utter.rate = 1.1;
+        window.speechSynthesis.speak(utter);
+    } catch (err) {}
+}
+
+// Random color
+function randomColor() {
+    return `hsl(${Math.random() * 360}, 100%, 50%)`;
+}
+
+// Send message to other popups
+function broadcast(text) {
+    channel.postMessage({ msg: text });
+}
+
+// Popup talks by itself every few seconds
+function startTalking() {
+    setInterval(() => {
+        let msg = annoyingLines[Math.floor(Math.random() * annoyingLines.length)];
+        box.innerText = msg;
+        speak(msg);
+        broadcast(msg);
+    }, Math.random() * 3000 + 3000);
+}
+startTalking();
+
+// Respond to messages from other popups
+channel.onmessage = (event) => {
+    if (!event.data.msg) return;
+
+    setTimeout(() => {
+        let reply = replyLines[Math.floor(Math.random() * replyLines.length)];
+        box.innerText = reply;
+        speak(reply);
+    }, Math.random() * 1200 + 400);
+};
+
+// Bouncing + flash + sound
 setInterval(() => {
     let w = window.innerWidth;
     let h = window.innerHeight;
@@ -64,11 +141,7 @@ setInterval(() => {
     box.style.transform = `translate(${x}px, ${y}px)`;
 }, 20);
 
-function randomColor() {
-    return `hsl(${Math.random() * 360}, 100%, 50%)`;
-}
-
-// Anti-close
+// Anti-close movement
 document.addEventListener("mousemove", (e) => {
     let distX = window.innerWidth - e.clientX;
     let distY = e.clientY;
@@ -77,10 +150,15 @@ document.addEventListener("mousemove", (e) => {
         x = Math.random() * (window.innerWidth - 200);
         y = Math.random() * (window.innerHeight - 200);
         sound.play();
+
+        let msg = "NOPE! CAN'T CLOSE ME!";
+        box.innerText = msg;
+        speak(msg);
+        broadcast(msg);
     }
 });
 
-// MAIN WINDOW can send message to force-close
+// Close message from main window
 window.addEventListener("message", (event) => {
     if (event.data === "closeNow") {
         window.close();
