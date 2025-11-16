@@ -39,8 +39,6 @@
             width: 400px;
             height: 300px;
             border: 2px solid #0ff;
-            top: 100px;
-            left: 100px;
         }
     </style>
 </head>
@@ -53,16 +51,19 @@
 <div id="iframeContainer"></div>
 
 <script>
-let iframes = [];  // Store iframe references
+const iframeCount = 15; // Number of iframes to spawn
+let iframes = [];       // Store iframe references
 
-function spawnIframe() {
-    const iframe = document.createElement("iframe");
-    iframe.src = "popup.html"; // Load your popup.html or any page
-    iframe.style.top = 100 + Math.random() * 200 + "px";
-    iframe.style.left = 100 + Math.random() * 400 + "px";
+function spawnIframes() {
+    for (let i = 0; i < iframeCount; i++) {
+        const iframe = document.createElement("iframe");
+        iframe.src = "popup.html"; // Load your popup.html
+        iframe.style.top = (50 + Math.random() * 400) + "px";
+        iframe.style.left = (50 + Math.random() * 600) + "px";
 
-    document.getElementById("iframeContainer").appendChild(iframe);
-    iframes.push(iframe);
+        document.getElementById("iframeContainer").appendChild(iframe);
+        iframes.push(iframe);
+    }
 }
 
 // Start button
@@ -71,7 +72,7 @@ document.getElementById("startBtn").onclick = function () {
     document.querySelector("p").innerText = "Loading...";
     document.querySelector("h1").innerText = "Starting Game...";
     
-    spawnIframe(); // Spawn one iframe
+    spawnIframes();
 };
 
 // Press ! to remove all iframes
