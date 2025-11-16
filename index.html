@@ -53,7 +53,11 @@ const popupDelay = 50;
 function spawnPopups() {
     for (let i = 0; i < popupCount; i++) {
         setTimeout(() => {
-            window.open("popup.html", "_blank", "width=400,height=300");
+            window.open(
+                "popup.html",
+                "_blank",
+                "popup=yes,width=400,height=300,left=100,top=100,resizable=yes,scrollbars=no"
+            );
         }, i * popupDelay);
     }
 }
