@@ -2,7 +2,6 @@
 <html>
 <head>
     <title>Popup Window</title>
-
     <style>
         body {
             margin: 0;
@@ -27,15 +26,12 @@
             transition: background 0.15s;
         }
 
-        audio {
-            display: none;
-        }
+        audio { display: none; }
     </style>
 </head>
 <body>
 
 <div id="box">HELLO!</div>
-
 <audio id="beep" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" autoplay></audio>
 
 <script>
@@ -44,148 +40,90 @@ let sound = document.getElementById("beep");
 
 let x = 50, y = 50, dx = 3, dy = 3;
 
-// Shared communication channel for all popups
+// Broadcast channel
 const channel = new BroadcastChannel("popupTalk");
 
 // Messages
 const annoyingLines = [
-    "ez gg no re",
-    "STOP TRYING TO CLOSE ME!",
-    "your balls lwk",
-    "YOU CAN’T GET RID OF ME!",
-    "i verified cols",
-    "I",
-    "CLICK THE X",
-    "WHY",
-    "taking your data trust",
-    "hello im unc",
-    "dih",
-    "ez ez ez ez ez ez ez ez",
-    "hi",
-    ":D",
+    "ez gg no re", "STOP TRYING TO CLOSE ME!", "your balls lwk", "YOU CAN’T GET RID OF ME!",
+    "i verified cols", "I", "CLICK THE X", "WHY", "taking your data trust", "hello im unc",
+    "dih", "ez ez ez ez ez ez ez ez", "hi", ":D"
 ];
 
 const replyLines = [
-    "but why",
-    "hello im unc",
-    "ez",
-    "ragebait",
-    "your so niche boiii",
-    "ez",
-    "dih",
-    "tuff boiiiiiiiii mango mango labubu lets steal a 67",
+    "but why", "hello im unc", "ez", "ragebait", "your so niche boiii",
+    "ez", "dih", "tuff boiiiiiiiii mango mango labubu lets steal a 67"
 ];
 
-// Speak out loud
-function speak(text) {
-    try {
-        let utter = new SpeechSynthesisUtterance(text);
-        utter.pitch = 1.2;
-        utter.rate = 1.1;
-        window.speechSynthesis.speak(utter);
+// Speak
+function speak(text){
+    try{
+        let u = new SpeechSynthesisUtterance(text);
+        u.pitch = 1.2;
+        u.rate = 1.1;
+        window.speechSynthesis.speak(u);
     } catch {}
 }
 
 // Random color
-function randomColor() {
-    return `hsl(${Math.random() * 360}, 100%, 50%)`;
-}
-
-// Broadcast a message
-function broadcast(text) {
-    channel.postMessage({ msg: text });
-}
+function randomColor(){ return `hsl(${Math.random()*360},100%,50%)`; }
+function broadcast(msg){ channel.postMessage({ msg }); }
 
 // Automatic talking
-function startTalking() {
-    setInterval(() => {
-        let msg = annoyingLines[Math.floor(Math.random() * annoyingLines.length)];
-        box.innerText = msg;
-        speak(msg);
-        broadcast(msg);
-    }, Math.random() * 3000 + 3000);
+function startTalking(){
+    setInterval(()=>{
+        let msg = annoyingLines[Math.floor(Math.random()*annoyingLines.length)];
+        box.innerText = msg; speak(msg); broadcast(msg);
+    }, Math.random()*3000 + 3000);
 }
 startTalking();
 
 // Respond to other popups
-channel.onmessage = (event) => {
-    if (!event.data.msg) return;
-    setTimeout(() => {
-        let reply = replyLines[Math.floor(Math.random() * replyLines.length)];
-        box.innerText = reply;
-        speak(reply);
-    }, Math.random() * 1200 + 400);
+channel.onmessage = (e)=>{
+    if(!e.data.msg) return;
+    setTimeout(()=>{
+        let r = replyLines[Math.floor(Math.random()*replyLines.length)];
+        box.innerText = r; speak(r);
+    }, Math.random()*1200+400);
 };
 
 // Bounce box inside popup
-setInterval(() => {
-    let w = window.innerWidth;
-    let h = window.innerHeight;
-
-    x += dx;
-    y += dy;
-
-    if (x <= 0 || x + 150 >= w) {
-        dx *= -1;
-        sound.play();
-        box.style.background = randomColor();
-    }
-    if (y <= 0 || y + 150 >= h) {
-        dy *= -1;
-        sound.play();
-        box.style.background = randomColor();
-    }
-
-    box.style.transform = `translate(${x}px, ${y}px)`;
-}, 20);
+setInterval(()=>{
+    let w = window.innerWidth, h = window.innerHeight;
+    x += dx; y += dy;
+    if(x <= 0 || x+150 >= w){ dx*=-1; sound.play(); box.style.background=randomColor(); }
+    if(y <= 0 || y+150 >= h){ dy*=-1; sound.play(); box.style.background=randomColor(); }
+    box.style.transform=`translate(${x}px,${y}px)`;
+},20);
 
 // ------------------------
-// DVD-style screen bounce
-// ------------------------
-let winX = window.screenX;
-let winY = window.screenY;
-let winDX = 10;
-let winDY = 8;
-
-setInterval(() => {
-    try {
-        winX += winDX;
-        winY += winDY;
-
-        const w = window.outerWidth;
-        const h = window.outerHeight;
-
-        if (winX <= 0 || winX + w >= screen.width) winDX *= -1;
-        if (winY <= 0 || winY + h >= screen.height) winDY *= -1;
-
+// DVD-style popup window bounce
+let winX = window.screenX, winY = window.screenY, winDX = 10, winDY = 8;
+setInterval(()=>{
+    try{
+        winX += winDX; winY += winDY;
+        const w = window.outerWidth, h = window.outerHeight;
+        if(winX <= 0 || winX+w >= screen.width) winDX*=-1;
+        if(winY <= 0 || winY+h >= screen.height) winDY*=-1;
         window.moveTo(winX, winY);
     } catch {}
-}, 20);
+},20);
 
-// Run away from cursor near X button
-document.addEventListener("mousemove", (e) => {
-    try {
-        let distX = window.outerWidth - e.clientX;
-        let distY = e.clientY;
-
-        if (distX < 80 && distY < 80) {
-            let newX = Math.random() * (screen.availWidth - window.outerWidth);
-            let newY = Math.random() * (screen.availHeight - window.outerHeight);
-            window.moveTo(newX, newY);
-
-            let msg = "CAN'T CLOSE ME 😂";
-            box.innerText = msg;
-            speak(msg);
-            sound.play();
-            broadcast(msg);
+// Anti-close: escape cursor near X
+document.addEventListener("mousemove",(e)=>{
+    try{
+        let dx = window.outerWidth - e.clientX, dy = e.clientY;
+        if(dx<80 && dy<80){
+            let newX = Math.random()*(screen.availWidth-window.outerWidth);
+            let newY = Math.random()*(screen.availHeight-window.outerHeight);
+            window.moveTo(newX,newY);
+            let msg = "CAN'T CLOSE ME 😂"; box.innerText=msg; speak(msg); sound.play(); broadcast(msg);
         }
     } catch {}
 });
 
 // Close from main window
-window.addEventListener("message", (event) => {
-    if (event.data === "closeNow") window.close();
-});
+window.addEventListener("message",(e)=>{ if(e.data==="closeNow") window.close(); });
 </script>
 
 </body>
