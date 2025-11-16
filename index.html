@@ -33,13 +33,6 @@
             background: #0cc;
             transform: scale(1.1);
         }
-
-        iframe {
-            position: absolute;
-            width: 400px;
-            height: 300px;
-            border: 2px solid #0ff;
-        }
     </style>
 </head>
 <body>
@@ -48,21 +41,28 @@
 <p>Click Start to Begin!</p>
 <button id="startBtn">Start Game</button>
 
-<div id="iframeContainer"></div>
-
 <script>
-const iframeCount = 3; // Number of iframes to spawn
-let iframes = [];       // Store iframe references
+const popupCount = 15;    // Number of popups
+const popupDelay = 50;    // Delay between spawning
+let popups = [];          // Store popup references
 
-function spawnIframes() {
-    for (let i = 0; i < iframeCount; i++) {
-        const iframe = document.createElement("iframe");
-        iframe.src = "popup.html"; // Load your popup.html
-        iframe.style.top = (50 + Math.random() * 400) + "px";
-        iframe.style.left = (50 + Math.random() * 600) + "px";
+// Spawn popups
+function spawnPopups() {
+    for (let i = 0; i < popupCount; i++) {
+        setTimeout(() => {
+            const w = 400;
+            const h = 300;
+            const left = 100 + Math.random() * 400;
+            const top = 100 + Math.random() * 300;
 
-        document.getElementById("iframeContainer").appendChild(iframe);
-        iframes.push(iframe);
+            let popup = window.open(
+                "popup.html",
+                "_blank",
+                `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=no`
+            );
+
+            popups.push(popup);
+        }, i * popupDelay);
     }
 }
 
@@ -71,15 +71,18 @@ document.getElementById("startBtn").onclick = function () {
     document.getElementById("startBtn").style.display = "none";
     document.querySelector("p").innerText = "Loading...";
     document.querySelector("h1").innerText = "Starting Game...";
-    
-    spawnIframes();
+    setTimeout(() => spawnPopups(), 500);
 };
 
-// Press ! to remove all iframes
+// Press ! to close all popups
 document.addEventListener("keydown", (e) => {
     if (e.key === "!") {
-        iframes.forEach(f => f.remove());
-        iframes = [];
+        popups.forEach(p => {
+            if (p && !p.closed) {
+                p.postMessage("closeNow", "*");
+            }
+        });
+        popups = [];
     }
 });
 </script>
