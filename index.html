@@ -1,134 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Popup Window</title>
-
+    <title>Popup Swarm</title>
     <style>
         body {
-            margin: 0;
-            overflow: hidden;
-            background: black;
+            background: #111;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            text-align: center;
         }
 
-        #box {
-            width: 150px;
-            height: 150px;
-            background: red;
-            position: absolute;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        button {
+            padding: 20px 40px;
+            font-size: 24px;
+            border: none;
+            border-radius: 15px;
+            background: #ff4444;
             color: white;
-            font-size: 22px;
-            font-family: Arial, Helvetica, sans-serif;
-            text-align: center;
-            padding: 10px;
-            transition: background 0.15s;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #ff2222;
+        }
+
+        h1 {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        p {
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
 
-<div id="box">HELLO!</div>
+<h1>Popup Swarm</h1>
+<p>Click start to unleash chaos.</p>
 
-<audio id="beep" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+<button onclick="spawnPopups()">START</button>
 
 <script>
-let box = document.getElementById("box");
-let sound = document.getElementById("beep");
+let popupCount = 15;
+let popups = [];
 
-let x = 50;
-let y = 50;
-let dx = 3;
-let dy = 3;
+// Spawn 15 popup windows
+function spawnPopups() {
+    for (let i = 0; i < popupCount; i++) {
+        let left = 100 + i * 20;
+        let top = 100 + i * 20;
 
-// Annoying messages
-const annoyingLines = [
-    "ez gg no re",
-    "STOP TRYING TO CLOSE ME!",
-    "your balls lwk",
-    "YOU CAN’T GET RID OF ME!",
-    "i verified cols",
-    "I",
-    "CLICK THE X",
-    "WHY",
-    "taking your data trust",
-    "hello im unc",
-    "dih",
-    "ez ez ez ez ez ez ez ez",
-    "hi",
-    ":D",
-];
+        let w = window.open(
+            "popup.html",
+            "_blank",
+            `popup=yes,width=300,height=300,left=${left},top=${top},resizable=yes,scrollbars=no`
+        );
 
-// Make popup speak out loud
-function speak(text) {
-    try {
-        let utter = new SpeechSynthesisUtterance(text);
-        utter.pitch = 1.2;
-        utter.rate = 1.1;
-        window.speechSynthesis.speak(utter);
-    } catch (err) { }
+        popups.push(w);
+    }
 }
 
-// Random color
-function randomColor() {
-    return `hsl(${Math.random() * 360}, 100%, 50%)`;
-}
-
-// Talking every 3–6 seconds
-function startTalking() {
-    setInterval(() => {
-        let msg = annoyingLines[Math.floor(Math.random() * annoyingLines.length)];
-        box.innerText = msg;
-        speak(msg);
-    }, Math.random() * 3000 + 3000);
-}
-startTalking();
-
-// Bouncing + flash + sound
-setInterval(() => {
-    let w = window.innerWidth;
-    let h = window.innerHeight;
-
-    x += dx;
-    y += dy;
-
-    if (x <= 0 || x + 150 >= w) {
-        dx *= -1;
-        sound.play();
-        box.style.background = randomColor();
-    }
-
-    if (y <= 0 || y + 150 >= h) {
-        dy *= -1;
-        sound.play();
-        box.style.background = randomColor();
-    }
-
-    box.style.transform = `translate(${x}px, ${y}px)`;
-}, 20);
-
-// Anti-close (run from cursor)
-document.addEventListener("mousemove", (e) => {
-    let distX = window.innerWidth - e.clientX;
-    let distY = e.clientY;
-
-    if (distX < 120 && distY < 80) {
-        x = Math.random() * (window.innerWidth - 200);
-        y = Math.random() * (window.innerHeight - 200);
-        sound.play();
-
-        let msg = "NOPE! CAN'T CLOSE ME!";
-        box.innerText = msg;
-        speak(msg);
-    }
-});
-
-// Close message from main window
-window.addEventListener("message", (event) => {
-    if (event.data === "closeNow") {
-        window.close();
+// Close all on pressing "!"
+document.addEventListener("keydown", (e) => {
+    if (e.key === "!") {
+        for (let p of popups) {
+            try {
+                p.postMessage("closeNow", "*");
+            } catch {}
+        }
+        popups = [];
     }
 });
 </script>
