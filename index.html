@@ -44,32 +44,39 @@
 <button id="startBtn">Start Game</button>
 
 <script>
-// Number of popups
 const popupCount = 15;
+const popupDelay = 50;
 
-// Delay between each popup spawning
-const popupDelay = 50; 
+let popups = []; // store all popup handles
 
 function spawnPopups() {
     for (let i = 0; i < popupCount; i++) {
         setTimeout(() => {
-            window.open(
+            let win = window.open(
                 "popup.html",
                 "_blank",
                 "popup=yes,width=400,height=300,left=100,top=100,resizable=yes,scrollbars=no"
             );
+            popups.push(win);
         }, i * popupDelay);
     }
 }
 
-// When user clicks the start button
+// Close all popups when user presses "!"
+document.addEventListener("keydown", (e) => {
+    if (e.key === "!") {
+        popups.forEach(p => {
+            try { p.close(); } catch(e) {}
+        });
+        popups = [];
+    }
+});
+
 document.getElementById("startBtn").onclick = function () {
-    // Hide the start screen to look legit
     document.getElementById("startBtn").style.display = "none";
     document.querySelector("p").innerText = "Loading...";
     document.querySelector("h1").innerText = "Starting Game...";
 
-    // Small delay to feel real
     setTimeout(() => {
         spawnPopups();
     }, 500);
