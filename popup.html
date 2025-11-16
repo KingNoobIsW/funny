@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Popup</title>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: black;
+            transition: background 0.05s;
+        }
+
+        #text {
+            font-size: 40px;
+            transition: transform 0.05s;
+        }
+
+        audio {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="text">LOL!</div>
+
+<!-- Your loud sound -->
+<audio id="audio" autoplay>
+    <source src="photos/Eduard-Khil-Trololo-Song-_HD_.ogg" type="audio/ogg">
+</audio>
+
+<script>
+/* ------------------------------------------
+   FORCE AUDIO PLAYBACK (bypass autoplay block)
+------------------------------------------- */
+function forceAudio() {
+    const audio = document.getElementById("audio");
+    audio.volume = 1.0;
+    let playPromise = audio.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(() => {
+            // Try again until it works
+            setTimeout(forceAudio, 200);
+        });
+    }
+}
+forceAudio();
+
+/* ------------------------------------------
+   ROTATE + FLASH COLOR
+------------------------------------------- */
+let angle = 0;
+function rotateAndFlash() {
+    angle += 15;
+    document.getElementById("text").style.transform = `rotate(${angle}deg)`;
+
+    // Flash background
+    const r = Math.random()*255|0;
+    const g = Math.random()*255|0;
+    const b = Math.random()*255|0;
+    document.body.style.background = `rgb(${r},${g},${b})`;
+}
+
+/* ------------------------------------------
+   DVD BOUNCE MOVEMENT
+------------------------------------------- */
+let x = window.screenX;
+let y = window.screenY;
+let vx = 10;
+let vy = 8;
+
+function bounce() {
+    x += vx;
+    y += vy;
+
+    const w = window.outerWidth;
+    const h = window.outerHeight;
+
+    if (x <= 0 || x + w >= screen.width)  vx = -vx;
+    if (y <= 0 || y + h >= screen.height) vy = -vy;
+
+    window.moveTo(x, y);
+}
+
+/* ------------------------------------------
+   MAIN LOOP
+------------------------------------------- */
+setInterval(rotateAndFlash, 50);
+setInterval(bounce, 20);
+</script>
+
+</body>
+</html>
