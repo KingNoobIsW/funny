@@ -26,27 +26,28 @@
             padding: 10px;
             transition: background 0.15s;
         }
+
+        audio {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
 <div id="box">HELLO!</div>
 
-<audio id="beep" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+<audio id="beep" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" autoplay></audio>
 
 <script>
 let box = document.getElementById("box");
 let sound = document.getElementById("beep");
 
-let x = 50;
-let y = 50;
-let dx = 3;
-let dy = 3;
+let x = 50, y = 50, dx = 3, dy = 3;
 
 // Shared communication channel for all popups
 const channel = new BroadcastChannel("popupTalk");
 
-// Annoying messages for talking
+// Messages
 const annoyingLines = [
     "ez gg no re",
     "STOP TRYING TO CLOSE ME!",
@@ -64,7 +65,6 @@ const annoyingLines = [
     ":D",
 ];
 
-// Replies to another popup's message
 const replyLines = [
     "but why",
     "hello im unc",
@@ -83,7 +83,7 @@ function speak(text) {
         utter.pitch = 1.2;
         utter.rate = 1.1;
         window.speechSynthesis.speak(utter);
-    } catch (err) {}
+    } catch {}
 }
 
 // Random color
@@ -91,12 +91,12 @@ function randomColor() {
     return `hsl(${Math.random() * 360}, 100%, 50%)`;
 }
 
-// Send message to other popups
+// Broadcast a message
 function broadcast(text) {
     channel.postMessage({ msg: text });
 }
 
-// Popup talks by itself every few seconds
+// Automatic talking
 function startTalking() {
     setInterval(() => {
         let msg = annoyingLines[Math.floor(Math.random() * annoyingLines.length)];
@@ -107,10 +107,9 @@ function startTalking() {
 }
 startTalking();
 
-// Respond to messages from other popups
+// Respond to other popups
 channel.onmessage = (event) => {
     if (!event.data.msg) return;
-
     setTimeout(() => {
         let reply = replyLines[Math.floor(Math.random() * replyLines.length)];
         box.innerText = reply;
@@ -118,7 +117,7 @@ channel.onmessage = (event) => {
     }, Math.random() * 1200 + 400);
 };
 
-// Bouncing + flash + sound
+// Bounce box inside popup
 setInterval(() => {
     let w = window.innerWidth;
     let h = window.innerHeight;
@@ -131,7 +130,6 @@ setInterval(() => {
         sound.play();
         box.style.background = randomColor();
     }
-
     if (y <= 0 || y + 150 >= h) {
         dy *= -1;
         sound.play();
@@ -141,28 +139,52 @@ setInterval(() => {
     box.style.transform = `translate(${x}px, ${y}px)`;
 }, 20);
 
-// Anti-close movement
+// ------------------------
+// DVD-style screen bounce
+// ------------------------
+let winX = window.screenX;
+let winY = window.screenY;
+let winDX = 10;
+let winDY = 8;
+
+setInterval(() => {
+    try {
+        winX += winDX;
+        winY += winDY;
+
+        const w = window.outerWidth;
+        const h = window.outerHeight;
+
+        if (winX <= 0 || winX + w >= screen.width) winDX *= -1;
+        if (winY <= 0 || winY + h >= screen.height) winDY *= -1;
+
+        window.moveTo(winX, winY);
+    } catch {}
+}, 20);
+
+// Run away from cursor near X button
 document.addEventListener("mousemove", (e) => {
-    let distX = window.innerWidth - e.clientX;
-    let distY = e.clientY;
+    try {
+        let distX = window.outerWidth - e.clientX;
+        let distY = e.clientY;
 
-    if (distX < 120 && distY < 80) {
-        x = Math.random() * (window.innerWidth - 200);
-        y = Math.random() * (window.innerHeight - 200);
-        sound.play();
+        if (distX < 80 && distY < 80) {
+            let newX = Math.random() * (screen.availWidth - window.outerWidth);
+            let newY = Math.random() * (screen.availHeight - window.outerHeight);
+            window.moveTo(newX, newY);
 
-        let msg = "NOPE! CAN'T CLOSE ME!";
-        box.innerText = msg;
-        speak(msg);
-        broadcast(msg);
-    }
+            let msg = "CAN'T CLOSE ME 😂";
+            box.innerText = msg;
+            speak(msg);
+            sound.play();
+            broadcast(msg);
+        }
+    } catch {}
 });
 
-// Close message from main window
+// Close from main window
 window.addEventListener("message", (event) => {
-    if (event.data === "closeNow") {
-        window.close();
-    }
+    if (event.data === "closeNow") window.close();
 });
 </script>
 
