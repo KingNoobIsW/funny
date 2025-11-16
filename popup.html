@@ -1,99 +1,91 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Popup</title>
+    <title>Popup Window</title>
 
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            font-family: Arial, sans-serif;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             background: black;
-            transition: background 0.05s;
         }
 
-        #text {
-            font-size: 40px;
-            transition: transform 0.05s;
-        }
-
-        audio {
-            display: none;
+        #box {
+            width: 150px;
+            height: 150px;
+            background: red;
+            position: absolute;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 22px;
+            font-family: Arial, Helvetica, sans-serif;
+            transition: background 0.15s;
         }
     </style>
 </head>
 <body>
 
-<div id="text">ez</div>
+<div id="box">HELLO!</div>
 
-<!-- Your loud sound -->
-<audio id="audio" autoplay>
-    <source src="photos/Eduard-Khil-Trololo-Song-_HD_.ogg" type="audio/ogg">
-</audio>
+<audio id="beep" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
 
 <script>
-/* ------------------------------------------
-   FORCE AUDIO PLAYBACK (bypass autoplay block)
-------------------------------------------- */
-function forceAudio() {
-    const audio = document.getElementById("audio");
-    audio.volume = 1.0;
-    let playPromise = audio.play();
-    if (playPromise !== undefined) {
-        playPromise.catch(() => {
-            // Try again until it works
-            setTimeout(forceAudio, 200);
-        });
+let box = document.getElementById("box");
+let sound = document.getElementById("beep");
+
+let x = 50;
+let y = 50;
+let dx = 3;
+let dy = 3;
+
+// Bounce + flash + sound
+setInterval(() => {
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+
+    x += dx;
+    y += dy;
+
+    if (x <= 0 || x + 150 >= w) {
+        dx *= -1;
+        sound.play();
+        box.style.background = randomColor();
     }
-}
-forceAudio();
 
-/* ------------------------------------------
-   ROTATE + FLASH COLOR
-------------------------------------------- */
-let angle = 0;
-function rotateAndFlash() {
-    angle += 15;
-    document.getElementById("text").style.transform = `rotate(${angle}deg)`;
+    if (y <= 0 || y + 150 >= h) {
+        dy *= -1;
+        sound.play();
+        box.style.background = randomColor();
+    }
 
-    // Flash background
-    const r = Math.random()*255|0;
-    const g = Math.random()*255|0;
-    const b = Math.random()*255|0;
-    document.body.style.background = `rgb(${r},${g},${b})`;
+    box.style.transform = `translate(${x}px, ${y}px)`;
+}, 20);
+
+function randomColor() {
+    return `hsl(${Math.random() * 360}, 100%, 50%)`;
 }
 
-/* ------------------------------------------
-   DVD BOUNCE MOVEMENT
-------------------------------------------- */
-let x = window.screenX;
-let y = window.screenY;
-let vx = 10;
-let vy = 8;
+// Anti-close
+document.addEventListener("mousemove", (e) => {
+    let distX = window.innerWidth - e.clientX;
+    let distY = e.clientY;
 
-function bounce() {
-    x += vx;
-    y += vy;
+    if (distX < 120 && distY < 80) {
+        x = Math.random() * (window.innerWidth - 200);
+        y = Math.random() * (window.innerHeight - 200);
+        sound.play();
+    }
+});
 
-    const w = window.outerWidth;
-    const h = window.outerHeight;
-
-    if (x <= 0 || x + w >= screen.width)  vx = -vx;
-    if (y <= 0 || y + h >= screen.height) vy = -vy;
-
-    window.moveTo(x, y);
-}
-
-/* ------------------------------------------
-   MAIN LOOP
-------------------------------------------- */
-setInterval(rotateAndFlash, 50);
-setInterval(bounce, 20);
+// MAIN WINDOW can send message to force-close
+window.addEventListener("message", (event) => {
+    if (event.data === "closeNow") {
+        window.close();
+    }
+});
 </script>
 
 </body>
