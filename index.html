@@ -1,86 +1,136 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Cool Web Game</title>
+    <title>Popup Window</title>
 
     <style>
         body {
-            background: #111;
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+
+        #box {
+            width: 150px;
+            height: 150px;
+            background: red;
+            position: absolute;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            font-family: Arial, sans-serif;
+            font-size: 22px;
+            font-family: Arial, Helvetica, sans-serif;
             text-align: center;
-            margin-top: 100px;
-        }
-
-        h1 {
-            font-size: 50px;
-            margin-bottom: 20px;
-            color: #0ff;
-            text-shadow: 0px 0px 10px #0ff;
-        }
-
-        #startBtn {
-            padding: 20px 40px;
-            font-size: 28px;
-            background: #0ff;
-            color: #000;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        #startBtn:hover {
-            background: #0cc;
-            transform: scale(1.1);
+            padding: 10px;
+            transition: background 0.15s;
         }
     </style>
 </head>
 <body>
 
-<h1>Super Web Game</h1>
-<p>Click Start to Begin!</p>
+<div id="box">HELLO!</div>
 
-<button id="startBtn">Start Game</button>
+<audio id="beep" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
 
 <script>
-const popupCount = 15;
-const popupDelay = 50;
+let box = document.getElementById("box");
+let sound = document.getElementById("beep");
 
-let popups = []; // store all popup handles
+let x = 50;
+let y = 50;
+let dx = 3;
+let dy = 3;
 
-function spawnPopups() {
-    for (let i = 0; i < popupCount; i++) {
-        setTimeout(() => {
-            let win = window.open(
-                "popup.html",
-                "_blank",
-                "popup=yes,width=400,height=300,left=100,top=100,resizable=yes,scrollbars=no"
-            );
-            popups.push(win);
-        }, i * popupDelay);
-    }
+// Annoying messages
+const annoyingLines = [
+    "ez gg no re",
+    "STOP TRYING TO CLOSE ME!",
+    "your balls lwk",
+    "YOU CAN’T GET RID OF ME!",
+    "i verified cols",
+    "I",
+    "CLICK THE X",
+    "WHY",
+    "taking your data trust",
+    "hello im unc",
+    "dih",
+    "ez ez ez ez ez ez ez ez",
+    "hi",
+    ":D",
+];
+
+// Make popup speak out loud
+function speak(text) {
+    try {
+        let utter = new SpeechSynthesisUtterance(text);
+        utter.pitch = 1.2;
+        utter.rate = 1.1;
+        window.speechSynthesis.speak(utter);
+    } catch (err) { }
 }
 
-// Close all popups when user presses "!"
-document.addEventListener("keydown", (e) => {
-    if (e.key === "!") {
-        popups.forEach(p => {
-            try { p.close(); } catch(e) {}
-        });
-        popups = [];
+// Random color
+function randomColor() {
+    return `hsl(${Math.random() * 360}, 100%, 50%)`;
+}
+
+// Talking every 3–6 seconds
+function startTalking() {
+    setInterval(() => {
+        let msg = annoyingLines[Math.floor(Math.random() * annoyingLines.length)];
+        box.innerText = msg;
+        speak(msg);
+    }, Math.random() * 3000 + 3000);
+}
+startTalking();
+
+// Bouncing + flash + sound
+setInterval(() => {
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+
+    x += dx;
+    y += dy;
+
+    if (x <= 0 || x + 150 >= w) {
+        dx *= -1;
+        sound.play();
+        box.style.background = randomColor();
+    }
+
+    if (y <= 0 || y + 150 >= h) {
+        dy *= -1;
+        sound.play();
+        box.style.background = randomColor();
+    }
+
+    box.style.transform = `translate(${x}px, ${y}px)`;
+}, 20);
+
+// Anti-close (run from cursor)
+document.addEventListener("mousemove", (e) => {
+    let distX = window.innerWidth - e.clientX;
+    let distY = e.clientY;
+
+    if (distX < 120 && distY < 80) {
+        x = Math.random() * (window.innerWidth - 200);
+        y = Math.random() * (window.innerHeight - 200);
+        sound.play();
+
+        let msg = "NOPE! CAN'T CLOSE ME!";
+        box.innerText = msg;
+        speak(msg);
     }
 });
 
-document.getElementById("startBtn").onclick = function () {
-    document.getElementById("startBtn").style.display = "none";
-    document.querySelector("p").innerText = "Loading...";
-    document.querySelector("h1").innerText = "Starting Game...";
-
-    setTimeout(() => {
-        spawnPopups();
-    }, 500);
-};
+// Close message from main window
+window.addEventListener("message", (event) => {
+    if (event.data === "closeNow") {
+        window.close();
+    }
+});
 </script>
 
 </body>
