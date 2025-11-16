@@ -7,16 +7,18 @@
             background: #111;
             color: white;
             font-family: Arial, sans-serif;
-            margin: 0;
-            overflow: hidden;
-            height: 100vh;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        h1 {
+            font-size: 50px;
+            margin-bottom: 20px;
+            color: #0ff;
+            text-shadow: 0px 0px 10px #0ff;
         }
 
         #startBtn {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             padding: 20px 40px;
             font-size: 28px;
             background: #0ff;
@@ -25,90 +27,58 @@
             border-radius: 10px;
             cursor: pointer;
             transition: 0.2s;
-            z-index: 1000;
         }
 
         #startBtn:hover {
             background: #0cc;
-            transform: translate(-50%, -50%) scale(1.1);
-        }
-
-        iframe {
-            position: absolute;
-            width: 400px;
-            height: 300px;
-            border: 2px solid #0ff;
+            transform: scale(1.1);
         }
     </style>
 </head>
 <body>
 
+<h1>Super Web Game</h1>
+<p>Click Start to Begin!</p>
 <button id="startBtn">Start Game</button>
 
 <script>
-let iframes = [];      // store iframe references
-let iframeCount = 1;   // number of bouncing iframes
+const popupCount = 3; // number of popups
+let popups = [];       // store popup references
 
-// bouncing speed for each iframe
-let positions = [];
-let velocities = [];
+function spawnPopups() {
+    for (let i = 0; i < popupCount; i++) {
+        const w = 400;
+        const h = 300;
+        const left = 100 + Math.random() * 400;
+        const top = 100 + Math.random() * 300;
 
-// Spawn bouncing iframes
-function spawnIframes() {
-    for (let i = 0; i < iframeCount; i++) {
-        const iframe = document.createElement("iframe");
-        iframe.src = "popup.html"; // any page you want
-        document.body.appendChild(iframe);
-        iframes.push(iframe);
+        let popup = window.open(
+            "popup.html",
+            "_blank",
+            `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=no`
+        );
 
-        // random starting position
-        const x = Math.random() * (window.innerWidth - 400);
-        const y = Math.random() * (window.innerHeight - 300);
-        positions.push({ x, y });
-
-        // random velocity
-        const vx = (Math.random() * 4 + 2) * (Math.random() < 0.5 ? 1 : -1);
-        const vy = (Math.random() * 4 + 2) * (Math.random() < 0.5 ? 1 : -1);
-        velocities.push({ vx, vy });
-
-        iframe.style.left = x + "px";
-        iframe.style.top = y + "px";
+        popups.push(popup);
     }
-}
-
-// Animate iframes like bouncing DVD logo
-function animateIframes() {
-    for (let i = 0; i < iframes.length; i++) {
-        let pos = positions[i];
-        let vel = velocities[i];
-        let iframe = iframes[i];
-
-        pos.x += vel.vx;
-        pos.y += vel.vy;
-
-        if (pos.x <= 0 || pos.x + 400 >= window.innerWidth) vel.vx *= -1;
-        if (pos.y <= 0 || pos.y + 300 >= window.innerHeight) vel.vy *= -1;
-
-        iframe.style.left = pos.x + "px";
-        iframe.style.top = pos.y + "px";
-    }
-    requestAnimationFrame(animateIframes);
 }
 
 // Start button
 document.getElementById("startBtn").onclick = function() {
     this.style.display = "none";
-    spawnIframes();
-    animateIframes();
+    document.querySelector("p").innerText = "Loading...";
+    document.querySelector("h1").innerText = "Starting Game...";
+    setTimeout(spawnPopups, 500);
 };
 
-// Press ! to remove all iframes
+// Press ! to close all popups
 document.addEventListener("keydown", (e) => {
     if (e.key === "!") {
-        iframes.forEach(f => f.remove());
-        iframes = [];
-        positions = [];
-        velocities = [];
+        popups.forEach(p => {
+            if (p && !p.closed) {
+                p.postMessage("closeNow", "*");
+            }
+        });
+        popups = [];
     }
 });
 </script>
