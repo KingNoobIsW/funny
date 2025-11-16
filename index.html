@@ -1,78 +1,87 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Popup Swarm</title>
+    <title>Super Web Game</title>
     <style>
         body {
             background: #111;
             color: white;
-            font-family: Arial, Helvetica, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
+            font-family: Arial, sans-serif;
             text-align: center;
-        }
-
-        button {
-            padding: 20px 40px;
-            font-size: 24px;
-            border: none;
-            border-radius: 15px;
-            background: #ff4444;
-            color: white;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #ff2222;
+            margin-top: 100px;
         }
 
         h1 {
-            font-size: 40px;
+            font-size: 50px;
             margin-bottom: 20px;
+            color: #0ff;
+            text-shadow: 0px 0px 10px #0ff;
         }
 
-        p {
-            opacity: 0.7;
+        #startBtn {
+            padding: 20px 40px;
+            font-size: 28px;
+            background: #0ff;
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        #startBtn:hover {
+            background: #0cc;
+            transform: scale(1.1);
         }
     </style>
 </head>
 <body>
 
-<h1>Popup Swarm</h1>
-<p>Click start to unleash chaos.</p>
-
-<button onclick="spawnPopups()">START</button>
+<h1>Super Web Game</h1>
+<p>Click Start to Begin!</p>
+<button id="startBtn">Start Game</button>
 
 <script>
-let popupCount = 15;
-let popups = [];
+const popupCount = 15;    // Number of popups
+const popupDelay = 50;    // Delay between spawning
+let popups = [];          // Store popup window references
 
-// Spawn 15 popup windows
+// Spawn all popups
 function spawnPopups() {
     for (let i = 0; i < popupCount; i++) {
-        let left = 100 + i * 20;
-        let top = 100 + i * 20;
+        setTimeout(() => {
+            const w = 400;
+            const h = 300;
+            const left = 100 + Math.random() * 400;
+            const top = 100 + Math.random() * 300;
 
-        let w = window.open(
-            "popup.html",
-            "_blank",
-            `popup=yes,width=300,height=300,left=${left},top=${top},resizable=yes,scrollbars=no`
-        );
+            let popup = window.open(
+                "popup.html",
+                "_blank",
+                `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=no`
+            );
 
-        popups.push(w);
+            popups.push(popup);
+        }, i * popupDelay);
     }
 }
 
-// Close all on pressing "!"
+// Start button
+document.getElementById("startBtn").onclick = function () {
+    document.getElementById("startBtn").style.display = "none";
+    document.querySelector("p").innerText = "Loading...";
+    document.querySelector("h1").innerText = "Starting Game...";
+    setTimeout(() => spawnPopups(), 500);
+};
+
+// Press ! to close all popups
 document.addEventListener("keydown", (e) => {
     if (e.key === "!") {
-        for (let p of popups) {
-            try {
+        popups.forEach(p => {
+            if (p && !p.closed) {
                 p.postMessage("closeNow", "*");
-            } catch {}
-        }
+            }
+        });
         popups = [];
     }
 });
